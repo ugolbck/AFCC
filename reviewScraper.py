@@ -1,7 +1,7 @@
 """ 
 Creator: Ugo LOOBUYCK
 Date: January 2020
-Project: Master Thesis: feedback constructiveness classification
+Project: Master Thesis: 'feedback constructiveness classification'
 """
 
 
@@ -15,9 +15,9 @@ from time import sleep
 def linkCollecter(n_movies, n_max):
     """ Collects movie IDs and stores them in a set of strings
 
-    param n_movies : number of movies/series per page, passed in the url
-    param n_max : total number of movies/series to retrieve. if n_max is not a multiple of n_movies, the excedent won't be retrieved
-    return : set of strings """
+    param n_movies: number of movies/series per page, passed in the url
+    param n_max: total number of movies/series to retrieve. if n_max is not a multiple of n_movies, the excedent won't be retrieved
+    return: set of strings """
 
     assert n_movies != 0, "Number of movies per page can't be 0."
     assert n_max > n_movies, "Number of total movies must be higher than the number of movies per page."
@@ -36,13 +36,14 @@ def linkCollecter(n_movies, n_max):
             if links is not None and re.match(pattern, links) and 'vote' not in links and 'plotsummary' not in links:
                 titles.add(links)
             sleep(0.1)
+    print("Number of movies/reviews:", len(titles))
     return titles
     
 
 def scraper(movie_links):
     """ Scapes IMDb website to retrieve user reviews sorted by total number of votes
     
-    param movie_links : set or list of movies/series IDs to pass to the review page's url
+    param movie_links: set or list of movies/series IDs to pass to the review page's url
     return : list of lists containing review/helpful votes/total number of votes """
 
     rows = []
@@ -56,11 +57,12 @@ def scraper(movie_links):
     return rows
 
 
-def toCSV(rows):
-    """ Turns a list of list into a comma separated values file
-    param rows : list of lists """
+def toCSV(rows, filename):
+    """ Turns a list of lists into a comma separated values file
+    param rows: list of lists 
+    param filename: name of the csv file """
 
-    with open('test.csv', 'w', newline='') as outfile:
+    with open(filenema, 'w', newline='') as outfile:
         writer = csv.writer(outfile)
         writer.writerows(rows)
 
@@ -73,7 +75,7 @@ def toCSV(rows):
 # constructructiveness and helpfulness on IMDb.
 
 if __name__ == "__main__":
-    movies = linkCollecter(3, 7)
+    movies = linkCollecter(250, 1251)
     lines = scraper(movies)
-    toCSV(lines)
+    toCSV(lines, "imdbreviews.csv")
 
