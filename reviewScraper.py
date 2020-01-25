@@ -35,7 +35,7 @@ def linkCollecter(n_movies, n_max):
             links = link.get('href')
             if links is not None and re.match(pattern, links) and 'vote' not in links and 'plotsummary' not in links:
                 titles.add(links)
-            sleep(0.1)
+            sleep(0.4)
     print("Number of movies/reviews:", len(titles))
     return titles
     
