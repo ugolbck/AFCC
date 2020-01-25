@@ -51,9 +51,19 @@ TODO: everything
 
 TODO: everything
 
+- Naive Bayes
+- Linear Regression
+- Support Vector Machine
+- Decision tree ?
+
 ### Neural network models
 
 TODO: everything
+
+- Deep Convolutional network
+- Reccurent (LSTM/GRU) w/ attention mechanism
+- Deep Feed Forward
+- 
 
 ## Result collection and analysis
 
