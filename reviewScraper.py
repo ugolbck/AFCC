@@ -33,12 +33,13 @@ def linkCollecter(n_movies, n_max):
 
         # Movie ID 
         pattern = re.compile("(\/(title)\/(tt)[0-9]+\/)")
+        id_pattern = re.compile("([0-9]+)")
 
         for link in soup.find_all('a'):
             links = link.get('href')
             # Refining research in the different links 
             if links is not None and re.match(pattern, links) and 'vote' not in links and 'plotsummary' not in links:
-                titles.add(links)
+                titles.add(re.findall(id_pattern, links)[0])
             # Sleep to avoid having our IP address banned from IMDb server
             sleep(0.05)
     print("Number of movies/series:", len(titles))
@@ -54,7 +55,7 @@ def scraper(movie_links):
     rows = []
     for i in tqdm(movie_links):
         # Searching for top 25 voted reviews
-        movie_url = "https://www.imdb.com" + i + "reviews?sort=totalVotes&dir=desc&ratingFilter=0"
+        movie_url = "https://www.imdb.com/title/tt" + i + "/reviews?sort=totalVotes&dir=desc&ratingFilter=0"
         soup = BeautifulSoup(requests.get(movie_url).text, 'html.parser')
 
         # Creating review entry
@@ -85,6 +86,7 @@ def toCSV(rows, filename):
 
 if __name__ == "__main__":
     movies = linkCollecter(250, 1251)
+    print(movies)
     lines = scraper(movies)
-    toCSV(lines, "imdbreviews.csv")
+    toCSV(lines, "justincase.csv")
 
