@@ -46,22 +46,40 @@ def linkCollecter(n_movies, n_max):
     return titles
     
 
-def scraper(movie_links):
-    """ Scapes IMDb website to retrieve user reviews sorted by total number of votes
+def scraper(movie_links, limit):
+    """ Scapes IMDb website to retrieve user reviews sorted by total number of votes.
+    To avoid reviews without rating, we scrape the 25 reviews for each rating score [1-10].
+    This also maximizes the number of retrieved items.
     
     param movie_links: set or list of movies/series IDs to pass to the review page's url
+    param limit: approximative limit of entries in our data set
     return : list of lists containing review/helpful votes/total number of votes """
 
-    rows = []
+    rows = [['review', 'helpful', 'total_helpful', 'user_rating']]
     for i in tqdm(movie_links):
-        # Searching for top 25 voted reviews
-        movie_url = "https://www.imdb.com/title/tt" + i + "/reviews?sort=totalVotes&dir=desc&ratingFilter=0"
-        soup = BeautifulSoup(requests.get(movie_url).text, 'html.parser')
+        for j in range(1, 11):
+            if len(rows) >= limit:
+                break
+            # Searching for top 25 voted reviews for each rating score
+            movie_url = "https://www.imdb.com/title/tt" + i + "/reviews?sort=totalVotes&dir=desc&ratingFilter=" + str(j)
+            soup = BeautifulSoup(requests.get(movie_url).text, 'html.parser')
 
-        # Creating review entry
-        for review, score in zip(soup.find_all("div", class_="text show-more__control"), soup.find_all("div", class_="actions text-muted")):
-            votes = [int(s.replace(',', '')) for s in score.text.split() if s.replace(',', '').isdigit()]
-            rows.append([review.text, votes[0], votes[1]])
+            rev = soup.find_all("div", class_="text show-more__control")
+            sco = soup.find_all("div", class_="actions text-muted")
+            rat = soup.find_all("span", class_="rating-other-user-rating")
+
+            # We filter out the reviews listings that are missing a rating score (IMDb bug ??)
+            length = len(rev)
+            if any(len(lst) != length for lst in [sco, rat]):
+                print("Rating missing in movie:", i, "at rating", str(j))
+                pass
+
+            # Creating review entry
+            for review, score, rating in zip(rev, sco, rat):
+                # Retrieve helpfulness ratings and total ratings
+                votes = [int(s.replace(',', '')) for s in score.text.split() if s.replace(',', '').isdigit()]
+                # [REVIEW | HELPFULNESS | TOTAL VOTES | USER RATING]
+                rows.append([review.text, votes[0], votes[1], rating.span.text])
     
     print("Number of reviews:", len(rows))
     return rows
@@ -85,8 +103,8 @@ def toCSV(rows, filename):
 # constructructiveness and helpfulness on IMDb.
 
 if __name__ == "__main__":
-    movies = linkCollecter(250, 1251)
+    movies = linkCollecter(25, 125)
     print(movies)
-    lines = scraper(movies)
-    toCSV(lines, "justincase.csv")
+    lines = scraper(movies, 20000)
+    toCSV(lines, "reviews_and_ratings.csv")
 
