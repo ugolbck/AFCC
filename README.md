@@ -36,7 +36,7 @@ The test data sets will be collected later on, from different sources.
 ## Data Annotation
 
 TODO:
-- Define a constructivenes scale (4 classes to be able to compare with previous bonary work)
+- Define a constructivenes scale (4 classes to be able to compare with previous binary work)
 - Survey for annotation agreement
   - Google form with 20 reviews
   - Explain in detail each possible annotation
@@ -52,9 +52,7 @@ TODO: everything
 TODO: everything
 
 - Naive Bayes
-- Linear Regression
 - Support Vector Machine
-- Decision tree ?
 
 ### Neural network models
 
