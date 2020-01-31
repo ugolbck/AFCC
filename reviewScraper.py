@@ -69,10 +69,10 @@ def scraper(movie_links, limit):
             rat = soup.find_all("span", class_="rating-other-user-rating")
 
             # We filter out the reviews listings that are missing a rating score (IMDb bug ??)
-            length = len(rev)
-            if any(len(lst) != length for lst in [sco, rat]):
-                print("Rating missing in movie:", i, "at rating", str(j))
-                pass
+            # length = len(rev)
+            # if any(len(lst) != length for lst in [sco, rat]):
+            #     print("Rating missing in movie:", i, "at rating", str(j))
+            #     pass
 
             # Creating review entry
             for review, score, rating in zip(rev, sco, rat):
@@ -104,7 +104,6 @@ def toCSV(rows, filename):
 
 if __name__ == "__main__":
     movies = linkCollecter(25, 125)
-    print(movies)
     lines = scraper(movies, 20000)
     toCSV(lines, "reviews_and_ratings.csv")
 
