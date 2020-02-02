@@ -28,7 +28,7 @@ def resizeSave(reviews, to_file):
 if __name__ == "__main__":
 
     path_full_file = "../amazon_reviews.csv"
-    path_new_category = "../amazon_reviews_us_Electronics_v1_00.tsv"
+    path_new_category = "../amazon_reviews_us_Baby_v1_00.tsv"
 
     resizeSave(openShuffleTruncate(path_new_category, 1500), path_full_file)
 
