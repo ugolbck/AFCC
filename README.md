@@ -11,59 +11,97 @@ Project aims:
     
 
 ## Table of contents:
-* [Data collection](#data-collection)
+* [Constructiveness](#constructiveness)
+* [Data](#data)
   * [Training data](#training-data)
   * [Test data](#test-data)
 * [Data annotation](#data-annotation)
-* [Machine learning models](#machine-learning-models)
-  * [Non-neural models](#non-neural-models)
-  * [Neural network models](#neural-network-models)
-* [Result collection and analysis](#result-collection-and-analysis)
-* [Conclusion and future work](#conclusion-and-future-work)
+* [Features](#features)
+* [Machine Learning Models](#machine-learning-models)
+  * [Non-Neural](#non-neural)
+  * [Neural Network](#neural-network)
+* [Feature Selection](#feature-selection)
+* [Results and analysis](#results-and-analysis)
+* [Conclusion and Future Work](#conclusion-and-future-work)
 
-## Data collection
+## Constructiveness
+
+Constructiveness for reviews:
+
+- Respectful
+- States qualities and flaws
+- Turning negative into positive
+- Good spelling and phrasing
+- Decent length
+- Objective rather than subjective
+- Author has actual experience with the subject of the review
+
+...
+
+## Data
 
 ### Training data
 
-
+??? product reviews from the official Amazon data sets were collected randomly across
+the available categories (see Thesis Appendix for complete list).
 
 ### Test data
 
-The test data sets will be collected later on, from different sources.
-
-**Aim**: Test efficiency on both in-domain and out-of-domain data
+- ??? Amazon reviews
+- ??? Yelp reviews
+- ??? Wine reviews
 
 ## Data Annotation
 
+## Features
+
+We use different features for this classification task, including:
+
+- High-level features (length...)
+- Lexical features (# of postive words, ratio of uppercase words...)
+- Syntactic features (POS tags...)
+- Discourse features (argumentation indicators...)
+
+## Machine Learning Models
+
+We use scikit-learn for statistical models, SVMs and tree-based models.
+We use Keras (TensorFlow backend) for neural network models.
+
+All results are obtained on a validation set to determine the best set of features
+
+### Non-Neural
+
+Most promising model for:
+
+- Multiclass:
+    RandomForest (~ 62% F1) (all features)
+
+- Binary:
+    Logistic Regression (~ 78% F1) (all features)
+
+### Neural Network
+
+We train a RNN model with and without attention mechanism. We use GloVe word embeddings pre-trained on Twitter with 200 dimensions.
+
 TODO:
-- Define a constructivenes scale (4 classes to be able to compare with previous binary work)
-- Survey for annotation agreement
-  - Google form with 20 reviews
-  - Explain in detail each possible annotation
-  - Included a question on English speaking level (A/B/C/native)
-- Annotate at least 10000 reviews
 
-## Machine learning models
+- Fine-tune and test on sample of data for preliminary results.
 
-TODO: everything
+## Feature Selection
 
-### Non-neural models
+To reduce the dimensionality and complexity of our models, we select the k-best features
+by using a **mutual information** or **chi square** algorithm (from scikit-learn).
 
-TODO: everything
+We experiment only on the best performing model from the previous experiments for both 4 classes and 2 classes classification. 
+The goal is to see if we can reach optimal performance while using less features, therefore optimizing the model.
 
-- Naive Bayes
-- Support Vector Machine
+## Results and analysis
 
-### Neural network models
+We perform test on the different test sets, using our top models for 4 classes and 2 classes, with the best
+set of features and the optimal number of features.
 
-TODO: everything
 
-- Deep Convolutional network
-- Reccurent (LSTM/GRU) w/ attention mechanism
-- Deep Feed Forward
-- 
+## Conlusion and Future Work
 
-## Result collection and analysis
-
-TODO: everything
+----
 

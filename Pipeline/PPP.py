@@ -62,8 +62,9 @@ class PPPipeline:
         self.num_to_words()
         if self.corenlp:
             self.annotate(self.nlp_tagger)
-        self.length()
+        self.length_features()
         self.join_words()
+        self.flesch_ease()
 
         n_rows = str(self.getRows(self.df))
         train, test = self.tr_te_split()
@@ -86,7 +87,6 @@ class PPPipeline:
         """ Helper method """
         return frame.dropna(subset=['tag'])
 
-    
     def reset_ind(self, frame):
         """ Helper method """
         return frame.reset_index(drop=True)
@@ -148,8 +148,13 @@ class PPPipeline:
         self.df['text_pos'] = tags
         self.df['lemmas'] = lemmas
 
-    def length(self):
+    def length_features(self):
+        """ Gets number of tokens
+        Works when review is a list of tokens """
+        assert isinstance(self.df.iloc[0, self.col_name], list)
         self.df['num_tokens'] = [len(x) for x in self.df.loc[:, self.col_name]]
+        self.df['num_char'] = [sum([len(x) for x in i]) for i in self.df.loc[:, self.col_name]]
+        
     
     def join_words(self):
         self.df[self.col_name] = [' '.join(x) for x in self.df.loc[:, self.col_name]]
@@ -169,6 +174,9 @@ class PPPipeline:
         return strat_train, strat_test
         
     def flesch_ease(self):
+        """ Compute readability measure for each review.
+        """
+        assert isinstance(self.df.iloc[0, self.col_name], str)
         self.df['read_score'] = [textstat.flesch_reading_ease(x) for x in self.df.loc[:, self.col_name]]
 
     def output(self, outdir, **out_data):
@@ -178,5 +186,5 @@ class PPPipeline:
 
 
 if __name__ == "__main__":
-    proc = PPPipeline('./data', '2830_reviews.csv')
+    proc = PPPipeline('./raw_data', '2830_reviews.csv')
 
