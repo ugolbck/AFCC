@@ -68,7 +68,7 @@ class PPPipeline:
         n_rows = str(self.getRows(self.df))
         train, test = self.tr_te_split()
 
-        self.output(train_d=(train, n_rows+'_train.csv'), test_d=(test, n_rows+'_test.csv'))
+        self.output('./output', train_d=(train, n_rows+'_train.csv'), test_d=(test, n_rows+'_test.csv'))
 
         self.head(train)
         self.head(test)
@@ -171,9 +171,9 @@ class PPPipeline:
     def flesch_ease(self):
         self.df['read_score'] = [textstat.flesch_reading_ease(x) for x in self.df.loc[:, self.col_name]]
 
-    def output(self, **out_data):
+    def output(self, outdir, **out_data):
         for val in out_data.values():
-            val[0].to_csv(os.path.join(self.filepath, val[1]))
+            val[0].to_csv(os.path.join(outdir, val[1]))
     
 
 
