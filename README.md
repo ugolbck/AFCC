@@ -1,9 +1,14 @@
 # AFCC - Automated Feedback Constructiveness Classifier
 
+Author: **Ugo Loobuyck**
+Purpose: **Master's Thesis**
+
 Project aims:
-- Show the possibility to classify texts based on their constructiveness
-- Compare different models (state-of-the-art and outdated), different sets of features, different word embeddings
-- Show that it is possible to use constructiveness as an alternative to inter-user (biased) helpfulness votes
+- Show the possibility to classify feedback reviews based on constructiveness:
+    - Provide a valid and reliable constructiveness scale.
+    - Compare different models, different sets of features and numberof features.
+    - Compare our scale results with binary classification and out-of-domain data.
+    
 
 ## Table of contents:
 * [Data collection](#data-collection)
@@ -20,12 +25,7 @@ Project aims:
 
 ### Training data
 
-The file reviewScraper.py scrapes [IMDb](imdb.com) user reviews for movies, series and games.
-We use [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) to crawl the data.
 
-Total number of pages scraped: **1257**
-
-Total number of reviews retrieved: **31104** 
 
 ### Test data
 
