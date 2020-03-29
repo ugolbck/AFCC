@@ -1,6 +1,7 @@
 # AFCC - Automated Feedback Constructiveness Classifier
 
 Author: **Ugo Loobuyck**
+
 Purpose: **Master's Thesis**
 
 Project aims:
