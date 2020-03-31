@@ -5,6 +5,7 @@ import string
 import os
 import time
 import sys
+import json
 import nltk
 import textstat
 from nltk.tokenize import casual_tokenize
@@ -54,22 +55,37 @@ class PPPipeline:
         """
         self.tag_manager()
         self.df = self.remove_missing(self.df)
+
+        # Tests step by step
+        self.df = self.reset_ind(self.df.iloc[1:5, :])
+        self.head(self.df)
+
+        print("FRAME SHORTENED")
+        print(self.df[self.col_name][0])
         self.html_url_cleaning()
         self.to_lower()
         if self.expansion:
+            print("EXPANSION...")
             self.expand(contraction_mapping)
+        print(self.df[self.col_name][0])
+        print("PUNCT REMOVE")
         self.remove_punct()
+        print(self.df[self.col_name][0])
+        print("NUM TO WORDS")
         self.num_to_words()
+        print(self.df[self.col_name][0])
         if self.corenlp:
             self.annotate(self.nlp_tagger)
+        print("LENGTH FEATURES")
         self.length_features()
+
         self.join_words()
         self.flesch_ease()
 
         n_rows = str(self.getRows(self.df))
         train, test = self.tr_te_split()
 
-        self.output('./output', train_d=(train, n_rows+'_train.csv'), test_d=(test, n_rows+'_test.csv'))
+        # self.output('./output', train_d=(train, n_rows+'_train.csv'), test_d=(test, n_rows+'_test.csv'))
 
         self.head(train)
         self.head(test)
@@ -142,6 +158,7 @@ class PPPipeline:
                     'outputFormat': 'json',
                     'timeout': 10000,
                 })
+            
             tags.append(' '.join([x['pos'] for x in annot['sentences'][0]['tokens']]))
             lemmas.append(' '.join([x['lemma'] for x in annot['sentences'][0]['tokens']]))
 
@@ -151,7 +168,6 @@ class PPPipeline:
     def length_features(self):
         """ Gets number of tokens
         Works when review is a list of tokens """
-        assert isinstance(self.df.iloc[0, self.col_name], list)
         self.df['num_tokens'] = [len(x) for x in self.df.loc[:, self.col_name]]
         self.df['num_char'] = [sum([len(x) for x in i]) for i in self.df.loc[:, self.col_name]]
         
@@ -176,8 +192,21 @@ class PPPipeline:
     def flesch_ease(self):
         """ Compute readability measure for each review.
         """
-        assert isinstance(self.df.iloc[0, self.col_name], str)
         self.df['read_score'] = [textstat.flesch_reading_ease(x) for x in self.df.loc[:, self.col_name]]
+    
+    def cause_markers(self):
+        """ Method that adds a 'cause' discourse feature.
+        Spots if markers of cause like 'because' are
+        present in the review.
+        """
+        # as a result of
+        # because
+        # because of
+        # due to
+        # thanks to
+        pass
+
+    def
 
     def output(self, outdir, **out_data):
         for val in out_data.values():
