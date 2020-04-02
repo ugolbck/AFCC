@@ -5,8 +5,11 @@ Author: **Ugo Loobuyck**
 Purpose: **Master's Thesis**
 
 Project aims:
+- Investigate constructiveness in online reviews:
+    - Provide a valid and reliable constructiveness ranking scale.
+    - Provide training and test annotated data (~5k reviews).
+    
 - Show the possibility to classify feedback reviews based on constructiveness:
-    - Provide a valid and reliable constructiveness scale.
     - Compare different models, different sets of features and numberof features.
     - Compare our scale results with binary classification and out-of-domain data.
     
@@ -63,38 +66,45 @@ We use different features for this classification task, including:
 - Syntactic features (POS tags...)
 - Discourse features (argumentation indicators...)
 
-## Machine Learning Models
 
-We use scikit-learn for statistical models, SVMs and tree-based models.
-We use Keras (TensorFlow backend) for neural network models.
+## Non-Neural Models
 
-All results are obtained on a validation set to determine the best set of features
-
-### Non-Neural
+We use scikit-learn for statistical models, SVMs and tree-based models. _All results are obtained on a validation set to determine the best set of features_.
 
 Most promising model for:
 
 - Multiclass:
-    RandomForest (~ 62% F1) (all features)
+    RandomForest (~ .62 F1) (all features)
 
 - Binary:
-    Logistic Regression (~ 78% F1) (all features)
+    Logistic Regression (~ .78 F1) (all features)
 
-### Neural Network
-
-We train a RNN model with and without attention mechanism. We use GloVe word embeddings pre-trained on Twitter with 200 dimensions.
-
-TODO:
-
-- Fine-tune and test on sample of data for preliminary results.
-
-## Feature Selection
+### Feature Selection
 
 To reduce the dimensionality and complexity of our models, we select the k-best features
 by using a **mutual information** or **chi square** algorithm (from scikit-learn).
 
 We experiment only on the best performing model from the previous experiments for both 4 classes and 2 classes classification. 
 The goal is to see if we can reach optimal performance while using less features, therefore optimizing the model.
+
+## Neural Network Models
+
+We use Keras and TensorFlow for neural network models. _All results are obtained on a validation set to determine the best set of features_.
+
+We train a RNN model with and without attention mechanism. We use GloVe word embeddings pre-trained on Twitter with 200 dimensions.
+
+We also fine-tune some SOTA pre-trained models like BERT and XlNet and obtain our best results so far:
+
+- Multiclass:
+    * DistilBERT (~ .70 F1 and accuracy)
+    * BERT (~ .69 F1 and accuracy)
+    * XLNet (TBD)
+
+- Binary:
+    * DistilBERT (TBD)
+    * BERT (TBD)
+    * XLNet (TBD)
+    
 
 ## Results and analysis
 
