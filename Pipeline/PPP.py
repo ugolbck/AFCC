@@ -12,11 +12,14 @@ from nltk.tokenize import casual_tokenize
 from pycorenlp import StanfordCoreNLP
 from num2words import num2words
 from sklearn.model_selection import StratifiedShuffleSplit
+from contraction import contraction_mapping
 
 FILEDIR = './files'
 if FILEDIR not in sys.path:
     sys.path.insert(1, FILEDIR)
-from contraction import contraction_mapping
+
+
+
 
 class PPPipeline:
     """ Preprocessing pipeline. Read a raw csv file 
@@ -42,10 +45,6 @@ class PPPipeline:
             print("Make sure that the CoreNLP server is up and running.\n"
             "This scripts calls the localhost:9000")
             self.nlp_tagger = StanfordCoreNLP('http://localhost:' + str(self.port))
-        
-        t1 = time.time() # Remove when finished
-        self.full_process() # Remove when finished
-        print('Time:', time.time()-t1) # Remove when finished
 
 
     def full_process(self):
@@ -214,5 +213,6 @@ class PPPipeline:
 
 
 if __name__ == "__main__":
-    proc = PPPipeline('./raw_data', '2830_reviews.csv')
+    #proc = PPPipeline('./raw_data', '2830_reviews.csv')
+    pass
 
