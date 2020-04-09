@@ -19,12 +19,9 @@ if FILEDIR not in sys.path:
     sys.path.insert(1, FILEDIR)
 
 
-
-
 class PPPipeline:
-    """ Preprocessing pipeline. Read a raw csv file 
-    and outputs two ready-to-use processed csv train
-    and test files. """
+    """ Preprocessing pipeline. Uses a DataHolder
+    object to perform series of operations on it. """
 
     def __init__(self, filepath, filename, col_name='text_review', corenlp=True, port=9000, expansion=True, red_word_len=True, to_drop=None):
         
@@ -54,31 +51,31 @@ class PPPipeline:
         """
         self.tag_manager()
         self.df = self.remove_missing(self.df)
-
-        # Tests step by step
         self.df = self.reset_ind(self.df.iloc[1:5, :])
-        self.head(self.df)
 
         print("FRAME SHORTENED")
-        print(self.df[self.col_name][0])
         self.html_url_cleaning()
+
         self.to_lower()
+
         if self.expansion:
             print("EXPANSION...")
             self.expand(contraction_mapping)
-        print(self.df[self.col_name][0])
+        
         print("PUNCT REMOVE")
         self.remove_punct()
-        print(self.df[self.col_name][0])
+
         print("NUM TO WORDS")
         self.num_to_words()
-        print(self.df[self.col_name][0])
         if self.corenlp:
             self.annotate(self.nlp_tagger)
+
         print("LENGTH FEATURES")
         self.length_features()
 
         self.join_words()
+
+        print("READABILITY")
         self.flesch_ease()
 
         n_rows = str(self.getRows(self.df))
@@ -169,7 +166,6 @@ class PPPipeline:
         Works when review is a list of tokens """
         self.df['num_tokens'] = [len(x) for x in self.df.loc[:, self.col_name]]
         self.df['num_char'] = [sum([len(x) for x in i]) for i in self.df.loc[:, self.col_name]]
-        
     
     def join_words(self):
         self.df[self.col_name] = [' '.join(x) for x in self.df.loc[:, self.col_name]]
@@ -209,10 +205,37 @@ class PPPipeline:
     def output(self, outdir, **out_data):
         for val in out_data.values():
             val[0].to_csv(os.path.join(outdir, val[1]))
-    
 
+
+class DataHolder:
+    """ Holds a pandas.DataFrame object an all
+    necessary methods to perform preprocessing
+    and feature engineering.
+    """
+
+    def __init__(self, filepath, filename):
+        self.df = pd.read_csv(os.path.join(filepath, filename))
+
+        print(self.df.shape)
+
+        self.dropna('tag')
+
+        print(self.df.shape)
+
+    def head(self):
+        print(self.df.head())
+    
+    def dropna(self, column):
+        self.df = self.df.dropna(subset=[column])
+
+    def tag_manager(self, column:str, scheme='to_numeric'):
+        if scheme == 'to_numeric':
+            self.df['tag'] = self.df.loc[:, 'tag'].map({'a': 0, 'b': 1, 'c': 2, 'd': 3,})
+            self.df['bin_tag'] = self.df.loc[:, 'tag'].map({0: 0, 1: 0, 2: 1, 3: 1})
+        else:
+            raise ValueError('Wrong scheme name!')
 
 if __name__ == "__main__":
-    #proc = PPPipeline('./raw_data', '2830_reviews.csv')
-    pass
+    
+    my_frame = DataHolder('../data/raw_data', '2830_reviews.csv')
 
