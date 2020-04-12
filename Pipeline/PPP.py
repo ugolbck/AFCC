@@ -1,3 +1,10 @@
+# TODO:
+# Transfert all methods to functions
+# make wrappers for:
+#   - processing training
+#   - processing test
+
+
 import pandas as pd
 import html
 import re
@@ -11,14 +18,68 @@ import textstat
 from nltk.tokenize import casual_tokenize
 from pycorenlp import StanfordCoreNLP
 from num2words import num2words
-from sklearn.model_selection import StratifiedShuffleSplit
-from contraction import contraction_mapping
+from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
+from .contraction import contraction_mapping
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
+
+PORT = 9000
+CORENLP = True
+EXPANSION = True
 FILEDIR = './files'
 if FILEDIR not in sys.path:
     sys.path.insert(1, FILEDIR)
 
+def file_split(data, tag_column='tag', to_csv=False, out_dir=None):
+    """ Wrapper """
+    data = _early_check(data, tag_column)
+
+    train, test = _tr_te_split(data)
+
+    if to_csv and out_dir:
+        train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
+        test.to_csv(os.path.join(out_dir, test.shape[0]+'_test.csv'))
+
+    return train, test
+
+def preprocess_train(data, text_column='text_review', tag_column='tag', split_val=True):
+    """ Wrapper """
+    data = _early_check(data, tag_column)
+    _to_numeric(data, tag_column)
+
+    print(data.head())
+    print(data.info())
+
+def preprocess_test(data, text_column='text_review', tag_column='tag', tag_pattern='abcd'):
+    data = _early_check(data, tag_column)
+    _to_numeric(data, )
+
+def _early_check(data, tag_column):
+    assert isinstance(data, pd.DataFrame), 'Wrong type!'
+    if 'Unnamed: 0' in data.columns:
+        return data.drop('Unnamed: 0', axis=1)
+    data.dropna(subset=[tag_column], inplace=True)
+    data.reset_index(drop=True, inplace=True)
+    return data
+
+
+def _tr_te_split(data, tag_col='tag', te_size=0.1):
+    assert tag_col in data.columns, "No column {} found in DataFrame.".format(tag_col)
+
+    sss1 = StratifiedShuffleSplit(n_splits=1, test_size=te_size)
+    for train_index, test_index in sss1.split(data, data[tag_col]):
+        strat_train = data.loc[train_index]
+        strat_test = data.loc[test_index]
+
+    return strat_train, strat_test
+
+def _to_numeric(data, tag_column, pattern='abcd'):
+    if pattern == 'abcd':
+        data[tag_column] = data.loc[:, tag_column].map({'a': 0, 'b': 1, 'c': 2, 'd': 3})
+        data['bin_tag'] = data.loc[:, tag_column].map({0: 0, 1: 0, 2: 1, 3: 1})
+    elif pattern == 'yesno':
+        data[tag_column] = data.loc[:, tag_column].map({'no': 0, 'yes': 1})
+    
 
 class PPPipeline:
     """ Preprocessing pipeline. Uses a DataHolder
@@ -26,6 +87,7 @@ class PPPipeline:
 
     def __init__(self, holder, corenlp=True, port=9000, expansion=True):
         
+        assert isinstance(holder, DataHolder), "Argument 'holder' must be a DataHolder object."
         self.holder = holder
         self.corenlp = corenlp
         self.port = port
@@ -36,12 +98,6 @@ class PPPipeline:
             print("Make sure that the CoreNLP server is up and running.\n"
             "This scripts listens to localhost:9000")
             self.nlp_tagger = StanfordCoreNLP('http://localhost:' + str(self.port))
-
-    def train_test_split(self, data):
-        pass
-
-    def process_test_data(self, data):
-        pass
 
     def process_train_data(self, data):
         self.dropna('tag', self.df)
@@ -81,27 +137,31 @@ class DataHolder:
 
     def __init__(self, filepath, filename):
         self.df = pd.read_csv(os.path.join(filepath, filename))
+        self.check_unnamed()
 
+    def check_unnamed(self):
+        if 'Unnamed: 0' in self.df.columns:
+            self.df = self.df.drop('Unnamed: 0', axis=1)
 
-    def head(self, frame=None):
-        if frame is not None and isinstance(frame, pd.DataFrame):
-            print(frame.head())
+    def head(self, n=5, frame=None):
+        if frame and isinstance(frame, pd.DataFrame):
+            print(frame.head(n))
         else:
-            print(self.df.head(30))
+            print(self.df.head(n))
     
     def dropna(self, column:str, frame):
-        frame.dropna(subset=[column], inplace=True)
+         return frame.dropna(subset=[column], inplace=True)
 
     def reset_ind(self, frame):
-        frame.reset_index(drop=True, inplace=True)
+        return frame.reset_index(drop=True, inplace=True)
 
     def drop_reset(self, column:str, frame):
-        self.dropna(column, frame)
-        self.reset_ind(frame)
-    
+        frame = self.dropna(column, frame)
+        return self.reset_ind(frame)
+
     def reset_drop(self, column:str, frame):
-        self.reset_ind(frame)
-        self.dropna(column, frame)
+        frame = self.reset_ind(frame)
+        return self.dropna(column, frame)
     
     def checkup(self):
         if self.df.isnull().values.any():
@@ -113,6 +173,9 @@ class DataHolder:
 
     def getColumns(self):
         return self.df.shape[1]
+    
+    def getShape(self):
+        return self.df.shape
 
     def to_numeric(self, column:str, scheme='abcd'):
         if scheme == 'abcd':
@@ -196,5 +259,5 @@ class DataHolder:
 
 if __name__ == "__main__":
     
-    my_frame = DataHolder('../data/raw_data', '2830_reviews.csv')
+    pass
 
