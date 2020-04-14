@@ -1,14 +1,8 @@
 # TODO:
-# Transfert all methods to functions
-# make wrappers for:
-#   - processing training
-
-
-# find index of "biggest factors in trump's election"
-
-
+# Bug in _remove_punct() only for SOCC corpus. Encoding? weird punctuation?
 
 import pandas as pd
+import numpy as np
 import html
 import re
 import string
@@ -41,10 +35,11 @@ if FILEDIR not in sys.path:
     sys.path.insert(1, FILEDIR)
 
 
-
 """ Wrapper functions """
 
 def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag', out_dir=None):
+    data = data[data[tag_column] != 'n']
+    
     data = _early_check(data, text_column, tag_column)
 
     train, test = _tr_te_split(data, tag_column, te_size=test_size)
@@ -71,33 +66,30 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     _to_lower(data, text_column)
     _expand(data, text_column)
     _join_split(data, text_column)
-    _remove_punct(data, text_column)
     _num_to_words(data, text_column)
     _join_split(data, text_column)
     _length_features(data, text_column, char_level=True)
     _join_words(data, text_column)
-    print(data[text_column].head())
-    print(data.info())
+    data = _early_check(data, text_column, tag_column)
+
     _annotate(data, text_column, nlp_tagger)
-    print(data.info())
-    data.rename(columns={text_column: 'text_review', tag_column: 'tag'})
     
-    train, val = _tr_te_split(data, 'tag')
+    train, val = _tr_te_split(data, tag_column)
     train = _early_check(train, text_column, tag_column)
-    test = _early_check(test, text_column, tag_column)
+    val = _early_check(val, text_column, tag_column)
 
     if out_dir:
         train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
-        val.to_csv(os.path.join(out_dir, test.shape[0]+'_val.csv'))
+        val.to_csv(os.path.join(out_dir, val.shape[0]+'_val.csv'))
     
     return train, val
 
 
-def preprocess_test(data, text_column='text_review', tag_column='tag', tag_pattern='abcd'):
+def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='abcd'):
 
     data = _early_check(data, text_column, tag_column)
     data = data.loc[:, [text_column, tag_column]]
-    _to_numeric(data, tag_column, tag_pattern)
+    _to_numeric(data, tag_column, pattern)
     _html_url_cleaning(data, text_column)
     _flesch_ease(data, text_column)
     _sentiment(data, text_column, analyzer)
@@ -105,15 +97,34 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', tag_patte
     _to_lower(data, text_column)
     _expand(data, text_column)
     _join_split(data, text_column)
-    _remove_punct(data, text_column)
     _num_to_words(data, text_column)
     _join_split(data, text_column)
     _length_features(data, text_column, char_level=True)
-    _join_words(data, text_column)
+    data = _early_check(data, text_column, tag_column)
     _annotate(data, text_column, nlp_tagger)
-    data.rename(columns={text_column: 'text_review', tag_column: 'tag'})
 
     return data
+
+def test_annot(data, text_column='comment_text', tag_column='is_constructive', pattern='yesno'):
+    data = _early_check(data, text_column, tag_column)
+    data = data.loc[:, [text_column, tag_column]]
+    _to_numeric(data, tag_column, pattern)
+    _html_url_cleaning(data, text_column)
+    _flesch_ease(data, text_column)
+    _sentiment(data, text_column, analyzer)
+    _tokenize(data, text_column)
+    _to_lower(data, text_column)
+    _expand(data, text_column)
+    _join_split(data, text_column)
+    _num_to_words(data, text_column)
+    _join_split(data, text_column)
+    _length_features(data, text_column, char_level=True)
+    data = _early_check(data, text_column, tag_column)
+    print(data.head())
+    print(data.info())
+    _annotate(data, text_column, nlp_tagger)
+
+    
 
 
 """ Helper functions """
@@ -125,8 +136,8 @@ def _early_check(data, text_column, tag_column):
 
     if 'Unnamed: 0' in data.columns:
         return data.drop('Unnamed: 0', axis=1)
-    data.dropna(subset=[tag_column], inplace=True)
-    data.reset_index(drop=True, inplace=True)
+    data = data.dropna(subset=[tag_column])
+    data = data.reset_index(drop=True)
     return data
 
 def _tr_te_split(data, tag_column, te_size=0.1):
@@ -182,18 +193,24 @@ def _annotate(data, text_column, tagger):
     assert isinstance(tagger, StanfordCoreNLP)
     tags, lemmas = [], []
     for i in data[text_column]:
+        if isinstance(i, list):
+            i = ' '.join(i)
         annot = tagger.annotate(i,
             properties={
                 'annotators': 'pos,lemma',
                 'outputFormat': 'json',
                 'timeout': 10000,
             })
-        
-        tags.append(' '.join([x['pos'] for x in annot['sentences'][0]['tokens']]))
-        lemmas.append(' '.join([x['lemma'] for x in annot['sentences'][0]['tokens']]))
-
+        try:
+            tags.append(' '.join([x['pos'] for x in annot['sentences'][0]['tokens']]))
+            lemmas.append(' '.join([x['lemma'] for x in annot['sentences'][0]['tokens']]))
+        except:
+            print('it failed')
+            print(i)
+    
     data['text_pos'] = tags
     data['lemmas'] = lemmas
+    
 
 def _sentiment(data, text_column, anal):
     data['sentiment'] = [anal.polarity_scores(x)['compound'] for x in data[text_column]]
@@ -241,5 +258,6 @@ class PPPipeline:
 
 if __name__ == "__main__":
     
-    pass
-
+    data = pd.read_csv('../data/data/SOCC.csv')
+    test = preprocess_test(data, text_column='comment_text', tag_column='is_constructive', pattern='yesno')
+    # test_annot(data)
