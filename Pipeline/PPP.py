@@ -100,33 +100,13 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     _num_to_words(data, text_column)
     _join_split(data, text_column)
     _length_features(data, text_column, char_level=True)
+    _join_words(data, text_column)
     data = _early_check(data, text_column, tag_column)
     _annotate(data, text_column, nlp_tagger)
-
+    
     return data
 
-def test_annot(data, text_column='comment_text', tag_column='is_constructive', pattern='yesno'):
-    data = _early_check(data, text_column, tag_column)
-    data = data.loc[:, [text_column, tag_column]]
-    _to_numeric(data, tag_column, pattern)
-    _html_url_cleaning(data, text_column)
-    _flesch_ease(data, text_column)
-    _sentiment(data, text_column, analyzer)
-    _tokenize(data, text_column)
-    _to_lower(data, text_column)
-    _expand(data, text_column)
-    _join_split(data, text_column)
-    _num_to_words(data, text_column)
-    _join_split(data, text_column)
-    _length_features(data, text_column, char_level=True)
-    data = _early_check(data, text_column, tag_column)
-    print(data.head())
-    print(data.info())
-    _annotate(data, text_column, nlp_tagger)
-
     
-
-
 """ Helper functions """
 
 def _early_check(data, text_column, tag_column):
