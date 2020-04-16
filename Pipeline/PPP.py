@@ -1,5 +1,6 @@
 # TODO:
 # Bug in _remove_punct() only for SOCC corpus. Encoding? weird punctuation?
+# Go around the bug: if CoreNLP annotation impossible for X reason, simply remove that instance.
 
 import pandas as pd
 import numpy as np
@@ -58,7 +59,8 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
 
     data = _early_check(data, text_column, tag_column)
     data = data.loc[:, [text_column, tag_column]]
-    _to_numeric(data, tag_column, pattern)
+    if pattern:
+        _to_numeric(data, tag_column, pattern)
     _html_url_cleaning(data, text_column)
     _flesch_ease(data, text_column)
     _sentiment(data, text_column, analyzer)
@@ -66,6 +68,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     _to_lower(data, text_column)
     _expand(data, text_column)
     _join_split(data, text_column)
+    _remove_punct(data, text_column)
     _num_to_words(data, text_column)
     _join_split(data, text_column)
     _length_features(data, text_column, char_level=True)
@@ -89,7 +92,8 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
 
     data = _early_check(data, text_column, tag_column)
     data = data.loc[:, [text_column, tag_column]]
-    _to_numeric(data, tag_column, pattern)
+    if pattern:
+        _to_numeric(data, tag_column, pattern)
     _html_url_cleaning(data, text_column)
     _flesch_ease(data, text_column)
     _sentiment(data, text_column, analyzer)
@@ -97,6 +101,7 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     _to_lower(data, text_column)
     _expand(data, text_column)
     _join_split(data, text_column)
+    _remove_punct(data, text_column)
     _num_to_words(data, text_column)
     _join_split(data, text_column)
     _length_features(data, text_column, char_level=True)
@@ -140,7 +145,8 @@ def _to_numeric(data, tag_column, pattern='abcd'):
         raise ValueError("Wrong pattern entered.")
 
 def _html_url_cleaning(data, text_column):
-        data[text_column] = [re.sub(r'(<.*?>)|((\[\[).*(\]\]))|(\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*)', '', html.unescape(x)) for x in data.loc[:, text_column]]
+        data[text_column] = [re.sub(r'(<.*?>)|((\[\[).*(\]\]))', '', html.unescape(x)) for x in data.loc[:, text_column]]
+        data[text_column] = [re.sub(r'(\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*)', 'link', x) for x in data.loc[:, text_column]]
 
 def _tokenize(data, text_column):
         if type(data[text_column][0]) is list:
@@ -172,10 +178,10 @@ def _num_to_words(data, text_column):
 def _annotate(data, text_column, tagger):
     assert isinstance(tagger, StanfordCoreNLP)
     tags, lemmas = [], []
-    for i in data[text_column]:
-        if isinstance(i, list):
-            i = ' '.join(i)
-        annot = tagger.annotate(i,
+    for review in data[text_column]:
+        if isinstance(review, list):
+            review = ' '.join(review)
+        annot = tagger.annotate(review,
             properties={
                 'annotators': 'pos,lemma',
                 'outputFormat': 'json',
@@ -185,8 +191,8 @@ def _annotate(data, text_column, tagger):
             tags.append(' '.join([x['pos'] for x in annot['sentences'][0]['tokens']]))
             lemmas.append(' '.join([x['lemma'] for x in annot['sentences'][0]['tokens']]))
         except:
-            print('it failed')
-            print(i)
+            tags.append('')
+            lemmas.append('')
     
     data['text_pos'] = tags
     data['lemmas'] = lemmas
