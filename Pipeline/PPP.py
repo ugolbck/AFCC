@@ -17,7 +17,7 @@ from nltk.tokenize import casual_tokenize
 from pycorenlp import StanfordCoreNLP
 from num2words import num2words
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
-from .contraction import contraction_mapping
+from .words import contraction_mapping, discourse
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 """ Globals """
@@ -39,6 +39,8 @@ if FILEDIR not in sys.path:
 """ Wrapper functions """
 
 def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag', out_dir=None):
+    print("Splitting files...")
+
     data = data[data[tag_column] != 'n']
     
     data = _early_check(data, text_column, tag_column)
@@ -51,11 +53,15 @@ def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag',
     if out_dir:
         train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
         test.to_csv(os.path.join(out_dir, test.shape[0]+'_test.csv'))
+    print("Splitting finished.")
 
     return train, test
 
 
-def preprocess_train(data, text_column='text_review', tag_column='tag', pattern='abcd', out_dir=None):
+def preprocess_train(data, text_column='text_review', tag_column='tag', pattern='abcd', split_val=False, out_dir=None):
+
+    print("Preprocessing of the training data...")
+    t1 = time.time()
 
     data = _early_check(data, text_column, tag_column)
     data = data.loc[:, [text_column, tag_column]]
@@ -65,6 +71,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     _flesch_ease(data, text_column)
     _sentiment(data, text_column, analyzer)
     _tokenize(data, text_column)
+    _count_upper(data, text_column)
     _to_lower(data, text_column)
     _expand(data, text_column)
     _join_split(data, text_column)
@@ -84,11 +91,17 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     if out_dir:
         train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
         val.to_csv(os.path.join(out_dir, val.shape[0]+'_val.csv'))
+        print("Files saved to {}.".format(out_dir))
+
+    print("Preprocessing finished in {} seconds.".format(time.time() - t1))
     
     return train, val
 
 
 def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='abcd'):
+
+    print("Preprocessing of the test data...")
+    t1 = time.time()
 
     data = _early_check(data, text_column, tag_column)
     data = data.loc[:, [text_column, tag_column]]
@@ -98,6 +111,7 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     _flesch_ease(data, text_column)
     _sentiment(data, text_column, analyzer)
     _tokenize(data, text_column)
+    _count_upper(data, text_column)
     _to_lower(data, text_column)
     _expand(data, text_column)
     _join_split(data, text_column)
@@ -109,6 +123,8 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     data = _early_check(data, text_column, tag_column)
     _annotate(data, text_column, nlp_tagger)
     
+    print("Preprocessing finished in {} seconds.".format(time.time() - t1))
+
     return data
 
     
@@ -169,6 +185,12 @@ def _to_lower(data, text_column):
 def _expand(data, text_column):
     data[text_column] = data.loc[:, text_column].map(lambda x: [contraction_mapping[i] if i in contraction_mapping else i for i in x])
 
+def _count_upper(data, text_column):
+    data['num_upper'] = data.loc[:, column_text].map(lambda x: sum([1 for i in x if i.isupper() and i != 'I']))
+
+def _count_punct(data, text_column):
+    data['num_punct'] = data.loc[:, column_text].map(lambda x: sum([1 for i in x if i in set(string.punctuation)]))
+
 def _remove_punct(data, text_column):
     data[text_column] = [[x for x in i if x not in set(string.punctuation)] for i in data[text_column]]
 
@@ -177,6 +199,7 @@ def _num_to_words(data, text_column):
 
 def _annotate(data, text_column, tagger):
     assert isinstance(tagger, StanfordCoreNLP)
+
     tags, lemmas = [], []
     for review in data[text_column]:
         if isinstance(review, list):
@@ -193,10 +216,8 @@ def _annotate(data, text_column, tagger):
         except:
             tags.append('')
             lemmas.append('')
-    
     data['text_pos'] = tags
     data['lemmas'] = lemmas
-    
 
 def _sentiment(data, text_column, anal):
     data['sentiment'] = [anal.polarity_scores(x)['compound'] for x in data[text_column]]
@@ -210,40 +231,6 @@ def _length_features(data, text_column, char_level=True):
         data['num_char'] = [sum([len(x) for x in i]) for i in data.loc[:, text_column]]
 
 
-
-class PPPipeline:   
-    def process_train_data(self, data):
-        self.dropna('tag', self.df)
-        self.to_numeric('tag', scheme='abcd')
-        if self.checkup():
-            self.drop_reset('tag', self.df)
-        self.html_url_cleaning('text_review')
-        self.flesch_ease('text_review')
-        self.sentiment('text_review', anal=analyzer)
-        self.head()
-        self.tokenize('text_review')
-        self.to_lower('text_review')
-        self.expand('text_review')
-        self.join_split('text_review')
-        self.remove_punct('text_review')
-        self.num_to_words('text_review')
-        self.join_split('text_review')
-        self.length_features('text_review')
-        self.join_words('text_review')
-        if self.checkup():
-            self.drop_reset('tag', self.df)
-        else:
-            self.reset_ind(self.df)
-        
-        train, test = self.tr_te_split(base='tag')
-        self.drop_reset('tag', train)
-        self.drop_reset('tag', test)
-
-        # self.output('./output', train_d=(train, n_rows+'_train.csv'), test_d=(test, n_rows+'_test.csv'))
-
-
 if __name__ == "__main__":
     
-    data = pd.read_csv('../data/data/SOCC.csv')
-    test = preprocess_test(data, text_column='comment_text', tag_column='is_constructive', pattern='yesno')
-    # test_annot(data)
+    pass

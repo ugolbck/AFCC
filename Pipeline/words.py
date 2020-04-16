@@ -43,3 +43,8 @@ contraction_mapping = {"ain't": "is not", "aren't": "are not","can't": "cannot",
                            "you'd": "you would", "you'd've": "you would have", "you'll": "you will", "you'll've": "you will have",
 
                            "you're": "you are", "you've": "you have"}
+
+discourse = ['however', 'but', 'also', 'although', 'though', 'tho', 'furthermore', 'moreover', 'additionally', 'then', 'besides', 'finally', 'nevertheless',
+            'similarly', 'even', 'otherwise', 'instead', 'nonetheless', 'meanwhile', 'subsequently', 'thereafter', 'likewise', 'currently', 'hence', 'so',
+            'therefore', 'accordingly', 'consequently', 'thus', 'anyway', 'specifically', 'such', 'generally', 'here', 'opposite', 'indeed', 'especially',
+            'unlike', 'significantly', 'because', 'compared', 'whereas', 'particularly']
