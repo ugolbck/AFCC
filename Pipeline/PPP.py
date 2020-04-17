@@ -15,8 +15,8 @@ from num2words import num2words
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-from .words import contraction_mapping, discourse
-from .utils import *
+from Pipeline.words import contraction_mapping, discourse
+from Pipeline.utils import *
 
 
 """ Globals """
