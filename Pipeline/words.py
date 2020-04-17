@@ -44,7 +44,15 @@ contraction_mapping = {"ain't": "is not", "aren't": "are not","can't": "cannot",
 
                            "you're": "you are", "you've": "you have"}
 
-discourse = ['however', 'but', 'also', 'although', 'though', 'tho', 'furthermore', 'moreover', 'additionally', 'then', 'besides', 'finally', 'nevertheless',
+discourse = [
+            # Simple markers
+            'however', 'but', 'also', 'although', 'though', 'tho', 'furthermore', 'moreover', 'additionally', 'then', 'besides', 'finally', 'nevertheless',
             'similarly', 'even', 'otherwise', 'instead', 'nonetheless', 'meanwhile', 'subsequently', 'thereafter', 'likewise', 'currently', 'hence', 'so',
-            'therefore', 'accordingly', 'consequently', 'thus', 'anyway', 'specifically', 'such', 'generally', 'here', 'opposite', 'indeed', 'especially',
-            'unlike', 'significantly', 'because', 'compared', 'whereas', 'particularly']
+            'therefore', 'accordingly', 'consequently', 'thus', 'anyway', 'specifically', 'generally', 'here', 'indeed', 'especially',
+            'unlike', 'significantly', 'because', 'whereas', 'particularly',
+            # Composed markers
+            'as if', 'as with', 'opposite to', 'in addition', 'on the other hand',
+            'in the meantime', 'in consequence', 'as a result', 'in short', 'in sum', 'in general', 'in brief', 'after all', 'it seems', 'for example',
+            'for instance', 'such as', 'that is', 'in particular', 'next to', 'at that point', 'compared to', 'equivalent to', 'in contrast',
+            'to sum up', 'as well as', 'in this case', 'as soon as', 'first of all'
+            ]

@@ -1,7 +1,3 @@
-# TODO:
-# Bug in _remove_punct() only for SOCC corpus. Encoding? weird punctuation?
-# Go around the bug: if CoreNLP annotation impossible for X reason, simply remove that instance.
-
 import pandas as pd
 import numpy as np
 import html
@@ -58,7 +54,7 @@ def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag',
     return train, test
 
 
-def preprocess_train(data, text_column='text_review', tag_column='tag', pattern='abcd', split_val=False, out_dir=None):
+def preprocess_train(data, text_column='text_review', tag_column='tag', pattern='abcd', split_val=True, val_size=0.1, out_dir=None):
 
     print("Preprocessing of the training data...")
     t1 = time.time()
@@ -78,24 +74,33 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     _remove_punct(data, text_column)
     _num_to_words(data, text_column)
     _join_split(data, text_column)
+    _discourse(data, text_column)
     _length_features(data, text_column, char_level=True)
     _join_words(data, text_column)
     data = _early_check(data, text_column, tag_column)
 
     _annotate(data, text_column, nlp_tagger)
     
-    train, val = _tr_te_split(data, tag_column)
-    train = _early_check(train, text_column, tag_column)
-    val = _early_check(val, text_column, tag_column)
+    if split_val:
+        train, val = _tr_te_split(data, tag_column, val_size)
+        train = _early_check(train, text_column, tag_column)
+        val = _early_check(val, text_column, tag_column)
 
-    if out_dir:
-        train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
-        val.to_csv(os.path.join(out_dir, val.shape[0]+'_val.csv'))
-        print("Files saved to {}.".format(out_dir))
+        if out_dir:
+            train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
+            val.to_csv(os.path.join(out_dir, val.shape[0]+'_val.csv'))
+            print("Files saved to {}.".format(out_dir))
+        
+        print("Preprocessing finished in {} seconds.".format(time.time() - t1))
+        return train, val
+    else:
+        train = _early_check(train, text_column, tag_column)
+        if out_dir:
+            train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
+            print("File saved to {}.".format(out_dir))
 
-    print("Preprocessing finished in {} seconds.".format(time.time() - t1))
-    
-    return train, val
+        print("Preprocessing finished in {} seconds.".format(time.time() - t1))
+        return train
 
 
 def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='abcd'):
@@ -118,6 +123,7 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     _remove_punct(data, text_column)
     _num_to_words(data, text_column)
     _join_split(data, text_column)
+    _discourse(data, text_column)
     _length_features(data, text_column, char_level=True)
     _join_words(data, text_column)
     data = _early_check(data, text_column, tag_column)
@@ -186,10 +192,10 @@ def _expand(data, text_column):
     data[text_column] = data.loc[:, text_column].map(lambda x: [contraction_mapping[i] if i in contraction_mapping else i for i in x])
 
 def _count_upper(data, text_column):
-    data['num_upper'] = data.loc[:, column_text].map(lambda x: sum([1 for i in x if i.isupper() and i != 'I']))
+    data['num_upper'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i.isupper() and i != 'I']))
 
 def _count_punct(data, text_column):
-    data['num_punct'] = data.loc[:, column_text].map(lambda x: sum([1 for i in x if i in set(string.punctuation)]))
+    data['num_punct'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i in set(string.punctuation)]))
 
 def _remove_punct(data, text_column):
     data[text_column] = [[x for x in i if x not in set(string.punctuation)] for i in data[text_column]]
@@ -219,16 +225,29 @@ def _annotate(data, text_column, tagger):
     data['text_pos'] = tags
     data['lemmas'] = lemmas
 
+def _discourse(data, text_column):
+    counts = []
+    for sent in data[text_column]:
+        count = 0
+        if isinstance(sent, list):
+            sent = ' '.join(sent)
+        for pattern in discourse:
+            res = re.findall(pattern, sent)
+            if res:
+                count += len(res)
+        counts.append(count)
+    data['num_discourse'] = counts
+
 def _sentiment(data, text_column, anal):
     data['sentiment'] = [anal.polarity_scores(x)['compound'] for x in data[text_column]]
 
 def _flesch_ease(data, text_column):
-    data['read_score'] = [textstat.flesch_reading_ease(x) for x in data.loc[:, text_column]]
+    data['read_score'] = [textstat.flesch_reading_ease(x) for x in data[text_column]]
 
 def _length_features(data, text_column, char_level=True):
-    data['num_tokens'] = [len(x) for x in data.loc[:, text_column]]
+    data['num_tokens'] = [len(x) for x in data[text_column]]
     if char_level:
-        data['num_char'] = [sum([len(x) for x in i]) for i in data.loc[:, text_column]]
+        data['num_char'] = [sum([len(x) for x in i]) for i in data[text_column]]
 
 
 if __name__ == "__main__":
