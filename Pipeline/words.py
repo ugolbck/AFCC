@@ -52,7 +52,8 @@ discourse = [
             'unlike', 'significantly', 'because', 'whereas', 'particularly',
             # Composed markers
             'as if', 'as with', 'opposite to', 'in addition', 'on the other hand',
-            'in the meantime', 'in consequence', 'as a result', 'in short', 'in sum', 'in general', 'in brief', 'after all', 'it seems', 'for example',
+            'in the meantime', 'in consequence', 'as a result', 'in short', 'in sum', 'to summarize', 'in general', 'in brief', 'after all', 'all in all',
+            'it seems', 'for example',
             'for instance', 'such as', 'that is', 'in particular', 'next to', 'at that point', 'compared to', 'equivalent to', 'in contrast',
-            'to sum up', 'as well as', 'in this case', 'as soon as', 'first of all'
+            'to sum up', 'as well as', 'in this case', 'as soon as', 'first of all', 'in my opinion',
             ]
