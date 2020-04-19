@@ -49,7 +49,7 @@ discourse = [
             'however', 'but', 'also', 'although', 'though', 'tho', 'furthermore', 'moreover', 'additionally', 'then', 'besides', 'finally', 'nevertheless',
             'similarly', 'even', 'otherwise', 'instead', 'nonetheless', 'meanwhile', 'subsequently', 'thereafter', 'likewise', 'currently', 'hence', 'so',
             'therefore', 'accordingly', 'consequently', 'thus', 'anyway', 'specifically', 'generally', 'here', 'indeed', 'especially',
-            'unlike', 'significantly', 'because', 'whereas', 'particularly',
+            'unlike', 'unless', 'significantly', 'because', 'whereas', 'particularly', 'unfortunately',
             # Composed markers
             'as if', 'as with', 'opposite to', 'in addition', 'on the other hand',
             'in the meantime', 'in consequence', 'as a result', 'in short', 'in sum', 'to summarize', 'in general', 'in brief', 'after all', 'all in all',
