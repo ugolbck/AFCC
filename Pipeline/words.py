@@ -44,7 +44,7 @@ contraction_mapping = {"ain't": "is not", "aren't": "are not","can't": "cannot",
 
                            "you're": "you are", "you've": "you have"}
 
-discourse = [
+discourse_markers = [
             # Simple markers
             'however', 'but', 'also', 'although', 'though', 'tho', 'furthermore', 'moreover', 'additionally', 'then', 'besides', 'finally', 'nevertheless',
             'similarly', 'even', 'otherwise', 'instead', 'nonetheless', 'meanwhile', 'subsequently', 'thereafter', 'likewise', 'currently', 'hence', 'so',
