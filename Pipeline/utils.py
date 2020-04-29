@@ -52,7 +52,7 @@ def to_numeric(data, tag_column, pattern='abcd'):
 
 def html_url_cleaning(data, text_column):
         data[text_column] = [re.sub(r'(<.*?>)|((\[\[).*(\]\]))', '', html.unescape(x)) for x in data.loc[:, text_column]]
-        data[text_column] = [re.sub(r'(\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*)', 'link', x) for x in data.loc[:, text_column]]
+        data[text_column] = [re.sub(r'(\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*)', '<url>', x) for x in data.loc[:, text_column]]
 
 def tokenize(data, text_column):
         if type(data[text_column][0]) is list:
