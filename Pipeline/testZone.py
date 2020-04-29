@@ -29,7 +29,7 @@ for i in df['text']:
         })
     pos_tags.append(' '.join([x['pos'] for x in annot_doc['sentences'][0]['tokens']]))
     lemmas.append(' '.join([x['lemma'] for x in annot_doc['sentences'][0]['tokens']]))
-    ner.append(' '.join([x['ner'] for x in annot_doc['sentences'][0]['tokens']]))
+    ner.append(sum([1 for x in annot_doc['sentences'][0]['tokens'] if x['ner'] != "O"]))
 
     with open('out.json', 'a+') as outp:
         print(annot_doc)

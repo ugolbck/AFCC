@@ -21,6 +21,11 @@ analyzer = SentimentIntensityAnalyzer()
 # Expand word contractions or not
 EXPANSION = True
 
+# positive/negative lexicon loading
+PATH_LEXICON = '/Users/ugo/Documents/MPLT/work/Thesis/AFCC/Pipeline/files/'
+with open(PATH_LEXICON+"positive-words.txt", "r") as positive, open(PATH_LEXICON+"negative-words.txt", "r", encoding="ISO-8859-1") as negative:
+    posit_list = [x[:-1] for x in positive.readlines()]
+    negat_list = [x[:-1] for x in negative.readlines()]
 
 """ Wrapper functions """
 
@@ -57,11 +62,12 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     sentiment(data, text_column, analyzer)
     tokenize(data, text_column)
     count_upper(data, text_column)
+    ner_extract(data, text_column, nlp_tagger)
     to_lower(data, text_column)
     expand(data, text_column)
     join_split(data, text_column)
-    count_positive(data, text_column)
-    count_negative(data, text_column)
+    count_positive(data, text_column, posit_list)
+    count_negative(data, text_column, negat_list)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
@@ -78,8 +84,8 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
         val = early_check(val, text_column, tag_column)
 
         if out_dir:
-            train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
-            val.to_csv(os.path.join(out_dir, val.shape[0]+'_val.csv'))
+            train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'))
+            val.to_csv(os.path.join(out_dir, str(val.shape[0])+'_val.csv'))
             print("Files saved to {}.".format(out_dir))
         
         print("Preprocessing finished in {} seconds.".format(time.time() - t1))
@@ -87,7 +93,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     else:
         train = early_check(train, text_column, tag_column)
         if out_dir:
-            train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
+            train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'))
             print("File saved to {}.".format(out_dir))
 
         print("Preprocessing finished in {} seconds.".format(time.time() - t1))
@@ -108,11 +114,12 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     sentiment(data, text_column, analyzer)
     tokenize(data, text_column)
     count_upper(data, text_column)
+    ner_extract(data, text_column, nlp_tagger)
     to_lower(data, text_column)
     expand(data, text_column)
     join_split(data, text_column)
-    count_positive(data, text_column)
-    count_negative(data, text_column)
+    count_positive(data, text_column, posit_list)
+    count_negative(data, text_column, negat_list)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)

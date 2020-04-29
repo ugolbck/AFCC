@@ -12,13 +12,6 @@ from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 
 from Pipeline.words import contraction_mapping, discourse_markers
 
-FILEDIR = './files'
-if FILEDIR not in sys.path:
-    sys.path.insert(1, FILEDIR)
-
-with open(FILEDIR + "positive-words.txt", "r") as positive, open(FILEDIR + "negative-words.txt", "r", encoding="ISO-8859-1") as negative:
-    posit_list = [x[:-1] for x in positive.readlines()]
-    negat_list = [x[:-1] for x in negative.readlines()]
 
 def early_check(data, text_column, tag_column):
     assert isinstance(data, pd.DataFrame), 'Wrong type!'
@@ -81,11 +74,11 @@ def count_upper(data, text_column):
 def count_punct(data, text_column):
     data['num_punct'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i in set(string.punctuation)]))
 
-def count_positive(data, text_column):
-    data['num_positives'] = data.loc[:, column_text].map(lambda x: sum([1 for i in x if i in posit_list]))
+def count_positive(data, text_column, pos_lexicon):
+    data['num_positives'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i in pos_lexicon]))
 
-def count_negative(data, text_column):
-    data['num_negatives'] = data.loc[:, column_text].map(lambda x: sum([1 for i in x if i in negat_list]))
+def count_negative(data, text_column, neg_lexicon):
+    data['num_negatives'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i in neg_lexicon]))
 
 def remove_punct(data, text_column):
     data[text_column] = [[x for x in i if x not in set(string.punctuation)] for i in data[text_column]]
@@ -114,6 +107,25 @@ def annotate(data, text_column, tagger):
             lemmas.append('')
     data['text_pos'] = tags
     data['lemmas'] = lemmas
+
+def ner_extract(data, text_column, tagger):
+    assert isinstance(tagger, StanfordCoreNLP)
+
+    entities = []
+    for review in data[text_column]:
+        if isinstance(review, list):
+            review = ' '.join(review)
+        annot = tagger.annotate(review,
+            properties={
+                'annotators': 'ner',
+                'outputFormat': 'json',
+                'timeout': 10000,
+            })
+        try:
+            ner.append(sum([1 for x in annot_doc['sentences'][0]['tokens'] if x['ner'] != "O"]))
+        except:
+            entities.append(0)
+    data['named_entities'] = entities
 
 def discourse(data, text_column):
     counts = []
