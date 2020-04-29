@@ -30,8 +30,6 @@ if FILEDIR not in sys.path:
 
 def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag', out_dir=None):
     print("Splitting files...")
-
-    data = data[data[tag_column] != 'n']
     
     data = early_check(data, text_column, tag_column)
 
@@ -41,8 +39,8 @@ def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag',
     test = early_check(test, text_column, tag_column)
 
     if out_dir:
-        train.to_csv(os.path.join(out_dir, train.shape[0]+'_train.csv'))
-        test.to_csv(os.path.join(out_dir, test.shape[0]+'_test.csv'))
+        train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'))
+        test.to_csv(os.path.join(out_dir, str(test.shape[0])+'_test.csv'))
     print("Splitting finished.")
 
     return train, test
