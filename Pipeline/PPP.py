@@ -21,10 +21,6 @@ analyzer = SentimentIntensityAnalyzer()
 # Expand word contractions or not
 EXPANSION = True
 
-FILEDIR = './files'
-if FILEDIR not in sys.path:
-    sys.path.insert(1, FILEDIR)
-
 
 """ Wrapper functions """
 
@@ -64,6 +60,8 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     to_lower(data, text_column)
     expand(data, text_column)
     join_split(data, text_column)
+    count_positive(data, text_column)
+    count_negative(data, text_column)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
@@ -113,6 +111,8 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     to_lower(data, text_column)
     expand(data, text_column)
     join_split(data, text_column)
+    count_positive(data, text_column)
+    count_negative(data, text_column)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
