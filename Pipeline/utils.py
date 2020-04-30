@@ -146,7 +146,7 @@ def sentiment(data, text_column, anal):
 def flesch_ease(data, text_column):
     data['read_score'] = [textstat.flesch_reading_ease(x) for x in data[text_column]]
 
-def length_features(data, text_column, char_level=True):
+def length_features(data, text_column):
     data['num_tokens'] = [len(x) for x in data[text_column]]
-    if char_level:
-        data['num_char'] = [sum([len(x) for x in i]) for i in data[text_column]]
+    data['num_char'] = [sum([len(x) for x in i]) for i in data[text_column]]
+    data['avg_word_length'] = data['num_char'] / data['num_tokens']

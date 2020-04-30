@@ -57,3 +57,12 @@ discourse_markers = [
             'for instance', 'such as', 'that is', 'in particular', 'next to', 'at that point', 'compared to', 'equivalent to', 'in contrast',
             'to sum up', 'as well as', 'in this case', 'as soon as', 'first of all', 'in my opinion',
             ]
+
+modals = [
+    'can', 'could', 'may', 'might', 'must', 'shall', 'will', 'need to', 'would', 'have to',
+    'can\'t', 'couldn\'t', 'mustn\'t', 'shan\'t', 'won\'t', 'wouldn\'t', 'haven\'t',
+]
+
+softeners = [
+    'maybe', 'perhaps', 'a little', 'barely', 'hardly', 'rarely', 'seldom', 'somewhat'
+]

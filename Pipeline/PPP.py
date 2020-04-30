@@ -72,7 +72,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     num_to_words(data, text_column)
     join_split(data, text_column)
     discourse(data, text_column)
-    length_features(data, text_column, char_level=True)
+    length_features(data, text_column)
     join_words(data, text_column)
     data = early_check(data, text_column, tag_column)
 
@@ -124,7 +124,7 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     num_to_words(data, text_column)
     join_split(data, text_column)
     discourse(data, text_column)
-    length_features(data, text_column, char_level=True)
+    length_features(data, text_column)
     join_words(data, text_column)
     data = early_check(data, text_column, tag_column)
     annotate(data, text_column, nlp_tagger)
