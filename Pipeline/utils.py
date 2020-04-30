@@ -10,7 +10,7 @@ from num2words import num2words
 from pycorenlp import StanfordCoreNLP
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 
-from Pipeline.words import contraction_mapping, discourse_markers
+from Pipeline.words import contraction_mapping, discourse_markers, modals, softeners
 
 
 def early_check(data, text_column, tag_column):
@@ -80,6 +80,12 @@ def count_positive(data, text_column, pos_lexicon):
 def count_negative(data, text_column, neg_lexicon):
     data['num_negatives'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i in neg_lexicon]))
 
+def count_punct(data, text_column):
+    data['num_punct'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i in set(string.punctuation)]))
+
+def count_unknown(data, text_column, word_dict):
+    data['num_unk'] = data.loc[:, text_column].map(lambda x: sum([1 for i in x if i not in word_dict]))
+
 def remove_punct(data, text_column):
     data[text_column] = [[x for x in i if x not in set(string.punctuation)] for i in data[text_column]]
 
@@ -127,18 +133,31 @@ def ner_extract(data, text_column, tagger):
             entities.append(0)
     data['named_entities'] = entities
 
-def discourse(data, text_column):
-    counts = []
+def discourse_features(data, text_column):
+    discourse, modal, soft = [], [], []
     for sent in data[text_column]:
-        count = 0
+        cnt_discourse, cnt_modal, cnt_soft = 0, 0, 0
         if isinstance(sent, list):
             sent = ' '.join(sent)
         for pattern in discourse_markers:
-            res = re.findall(pattern, sent)
-            if res:
-                count += len(res)
-        counts.append(count)
-    data['num_discourse'] = counts
+            res_discourse = re.findall(pattern, sent)
+            if res_discourse:
+                cnt_discourse += len(res_discourse)
+        for pattern in modals:
+            res_modals = re.findall(pattern, sent)
+            if res_modals:
+                cnt_modal += len(res_modals)
+        for pattern in softeners:
+            res_soft = re.findall(pattern, sent)
+            if res_soft:
+                cnt_soft += len(res_soft)
+
+        discourse.append(cnt_discourse)
+        modal.append(cnt_modal)
+        soft.append(cnt_soft)
+    data['num_discourse'] = discourse
+    data['num_modals'] = modal
+    data['num_softeneers'] = soft
 
 def sentiment(data, text_column, anal):
     data['sentiment'] = [anal.polarity_scores(x)['compound'] for x in data[text_column]]

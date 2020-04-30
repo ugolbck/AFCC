@@ -27,6 +27,10 @@ with open(PATH_LEXICON+"positive-words.txt", "r") as positive, open(PATH_LEXICON
     posit_list = [x[:-1] for x in positive.readlines()]
     negat_list = [x[:-1] for x in negative.readlines()]
 
+# English word lexicon
+with open(PATH_LEXICON+'word_dict.txt') as word_file:
+        valid_words = set(word_file.read().split())
+
 """ Wrapper functions """
 
 def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag', out_dir=None):
@@ -68,10 +72,11 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     join_split(data, text_column)
     count_positive(data, text_column, posit_list)
     count_negative(data, text_column, negat_list)
+    count_unknown(data, text_column, valid_words)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
-    discourse(data, text_column)
+    discourse_features(data, text_column)
     length_features(data, text_column)
     join_words(data, text_column)
     data = early_check(data, text_column, tag_column)
@@ -120,10 +125,11 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     join_split(data, text_column)
     count_positive(data, text_column, posit_list)
     count_negative(data, text_column, negat_list)
+    count_unknown(data, text_column, valid_words)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
-    discourse(data, text_column)
+    discourse_features(data, text_column)
     length_features(data, text_column)
     join_words(data, text_column)
     data = early_check(data, text_column, tag_column)
