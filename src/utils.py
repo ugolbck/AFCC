@@ -165,7 +165,7 @@ def discourse_features(data, text_column):
         soft.append(cnt_soft)
     data['num_discourse'] = discourse
     data['num_modals'] = modal
-    data['num_softeneers'] = soft
+    data['num_softeners'] = soft
 
 def sentiment(data, text_column, anal):
     data['sentiment'] = [anal.polarity_scores(x)['compound'] for x in data[text_column]]

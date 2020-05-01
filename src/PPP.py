@@ -44,8 +44,8 @@ def file_split(data, test_size=0.2, text_column='text_review', tag_column='tag',
     test = early_check(test, text_column, tag_column)
 
     if out_dir:
-        train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'))
-        test.to_csv(os.path.join(out_dir, str(test.shape[0])+'_test.csv'))
+        train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'), index=False)
+        test.to_csv(os.path.join(out_dir, str(test.shape[0])+'_test.csv'), index=False)
     print("Splitting finished.")
 
     return train, test
@@ -73,6 +73,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     count_positive(data, text_column, posit_list)
     count_negative(data, text_column, negat_list)
     count_unknown(data, text_column, valid_words)
+    count_punct(data, text_column)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
@@ -89,8 +90,8 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
         val = early_check(val, text_column, tag_column)
 
         if out_dir:
-            train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'))
-            val.to_csv(os.path.join(out_dir, str(val.shape[0])+'_val.csv'))
+            train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'), index=False)
+            val.to_csv(os.path.join(out_dir, str(val.shape[0])+'_val.csv'), index=False)
             print("Files saved to {}.".format(out_dir))
         
         print("Preprocessing finished in {} seconds.".format(time.time() - t1))
@@ -98,7 +99,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     else:
         train = early_check(train, text_column, tag_column)
         if out_dir:
-            train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'))
+            train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'), index=False)
             print("File saved to {}.".format(out_dir))
 
         print("Preprocessing finished in {} seconds.".format(time.time() - t1))
@@ -126,6 +127,7 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     count_positive(data, text_column, posit_list)
     count_negative(data, text_column, negat_list)
     count_unknown(data, text_column, valid_words)
+    count_punct(data, text_column)
     remove_punct(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
