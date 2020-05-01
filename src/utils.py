@@ -124,22 +124,22 @@ def ner_extract(data, text_column, tagger):
     for review in data[text_column]:
         if isinstance(review, list):
             review = ' '.join(review)
-        annot = tagger.annotate(review,
+        annot_doc = tagger.annotate(review,
             properties={
                 'annotators': 'ner',
                 'outputFormat': 'json',
                 'timeout': 10000,
             })
         try:
-            ner.append(sum([1 for x in annot_doc['sentences'][0]['tokens'] if x['ner'] != "O"]))
+            entities.append(sum([1 for x in annot_doc['sentences'][0]['tokens'] if x['ner'] != "O"]))
         except:
             entities.append(0)
     data['named_entities'] = entities
 
 def discourse_features(data, text_column):
-    discourse, modal, soft = [], [], []
+    discourse, modal = [], []
     for sent in data[text_column]:
-        cnt_discourse, cnt_modal, cnt_soft = 0, 0, 0
+        cnt_discourse, cnt_modal = 0, 0
         if isinstance(sent, str):
             sent = sent.split(' ')
 
@@ -149,8 +149,6 @@ def discourse_features(data, text_column):
                 cnt_discourse += 1
             if sent[i] in modals:
                 cnt_modal += 1
-            if sent[i] in softeners:
-                cnt_soft += 1
 
             # Match several word in lists
             if i > 0:
@@ -162,10 +160,8 @@ def discourse_features(data, text_column):
 
         discourse.append(cnt_discourse)
         modal.append(cnt_modal)
-        soft.append(cnt_soft)
     data['num_discourse'] = discourse
     data['num_modals'] = modal
-    data['num_softeners'] = soft
 
 def sentiment(data, text_column, anal):
     data['sentiment'] = [anal.polarity_scores(x)['compound'] for x in data[text_column]]
