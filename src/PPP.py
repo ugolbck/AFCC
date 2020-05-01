@@ -22,7 +22,7 @@ analyzer = SentimentIntensityAnalyzer()
 EXPANSION = True
 
 # positive/negative lexicon loading
-PATH_LEXICON = '/Users/ugo/Documents/MPLT/work/Thesis/AFCC/Pipeline/files/'
+PATH_LEXICON = '/Users/ugo/Documents/MPLT/work/Thesis/AFCC/src/files/'
 with open(PATH_LEXICON+"positive-words.txt", "r") as positive, open(PATH_LEXICON+"negative-words.txt", "r", encoding="ISO-8859-1") as negative:
     posit_list = [x[:-1] for x in positive.readlines()]
     negat_list = [x[:-1] for x in negative.readlines()]

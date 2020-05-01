@@ -1,3 +1,6 @@
+# Award winner for "most disgusting code" 
+# -> clean when I have time
+
 import pandas as pd
 import numpy as np
 import os, time, re
@@ -137,20 +140,25 @@ def discourse_features(data, text_column):
     discourse, modal, soft = [], [], []
     for sent in data[text_column]:
         cnt_discourse, cnt_modal, cnt_soft = 0, 0, 0
-        if isinstance(sent, list):
-            sent = ' '.join(sent)
-        for pattern in discourse_markers:
-            res_discourse = re.findall(pattern, sent)
-            if res_discourse:
-                cnt_discourse += len(res_discourse)
-        for pattern in modals:
-            res_modals = re.findall(pattern, sent)
-            if res_modals:
-                cnt_modal += len(res_modals)
-        for pattern in softeners:
-            res_soft = re.findall(pattern, sent)
-            if res_soft:
-                cnt_soft += len(res_soft)
+        if isinstance(sent, str):
+            sent = sent.split(' ')
+
+        for i in range(len(sent)):
+            # Match individual word in lists
+            if sent[i] in discourse_markers:
+                cnt_discourse += 1
+            if sent[i] in modals:
+                cnt_modal += 1
+            if sent[i] in softeners:
+                cnt_soft += 1
+
+            # Match several word in lists
+            if i > 0:
+                if sent[i-1] + ' ' + sent[i] in discourse_markers:
+                    cnt_discourse += 1
+            if i > 1:
+                if sent[i-2] + ' ' + sent[i-1] + ' ' + sent[i] in discourse_markers:
+                    cnt_discourse += 1
 
         discourse.append(cnt_discourse)
         modal.append(cnt_modal)
