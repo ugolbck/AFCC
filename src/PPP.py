@@ -7,7 +7,7 @@ import sys
 from pycorenlp import StanfordCoreNLP
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-from Pipeline.utils import *
+from src.utils import *
 
 
 """ Globals """

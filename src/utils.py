@@ -10,7 +10,7 @@ from num2words import num2words
 from pycorenlp import StanfordCoreNLP
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 
-from Pipeline.words import contraction_mapping, discourse_markers, modals, softeners
+from src.words import contraction_mapping, discourse_markers, modals, softeners
 
 
 def early_check(data, text_column, tag_column):
