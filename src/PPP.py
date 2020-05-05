@@ -75,6 +75,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
     count_unknown(data, text_column, valid_words)
     count_punct(data, text_column)
     remove_punct(data, text_column)
+    join_split(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
     discourse_features(data, text_column)
@@ -97,7 +98,7 @@ def preprocess_train(data, text_column='text_review', tag_column='tag', pattern=
         print("Preprocessing finished in {} seconds.".format(time.time() - t1))
         return train, val
     else:
-        train = early_check(train, text_column, tag_column)
+        train = early_check(data, text_column, tag_column)
         if out_dir:
             train.to_csv(os.path.join(out_dir, str(train.shape[0])+'_train.csv'), index=False)
             print("File saved to {}.".format(out_dir))
@@ -129,6 +130,7 @@ def preprocess_test(data, text_column='text_review', tag_column='tag', pattern='
     count_unknown(data, text_column, valid_words)
     count_punct(data, text_column)
     remove_punct(data, text_column)
+    join_split(data, text_column)
     num_to_words(data, text_column)
     join_split(data, text_column)
     discourse_features(data, text_column)
